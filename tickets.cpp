@@ -4,7 +4,7 @@
 #include <fstream>
 #include <sstream>
 #include <ranges>
-
+#include <GetOpt.h>
 struct flight
 {
 	int id;
@@ -183,7 +183,6 @@ void clearCanceledFlights(std::vector<A>& flightList, std::vector<int>& canceled
 	for (auto i : std::ranges::views::reverse(canceledList))
 	{
 		flightList.erase(flightList.begin() + i);
-		std::cout << "Removed flight at index " << i << " from the list" << std::endl;
 	}
 }
 
@@ -206,8 +205,6 @@ void checkFlightPopulation(std::vector<A>& flightList, std::vector<B>& bookingLi
 		snprintf(buffer, 200, "%d,%s,%s,%s,%s\n", flight->id, flight->departure, flight->destination, flight->date, flight->time);
 
 		canceledFlights << buffer;
-
-		std::cout << "Flight canceled: " << buffer << "\n";
 
 		canceledFlights.close();
 
@@ -274,26 +271,52 @@ void createSeatMap(std::vector<A>& flightList, std::vector<B>& bookingList)
 
 int main(int argc, char** argv)
 {
-	if (argc < 2)
+	char* flightFile = NULL;
+	char* bookingFile = NULL;
+	int c;
+
+	while ((c = getopt(argc, argv, "f:b:")) != -1)
 	{
-		std::cout << "No command line arguments found, please specify flights file and bookings file when running the program" << std::endl;
-		return 0;
+		switch (c)
+		{
+		case 'f':
+			flightFile = optarg;
+			break;
+		case 'b':
+			bookingFile = optarg;
+			break;
+		case '?':
+			std::cout << "Usage: " << argv[0] << " -f <flights_file.csv> -b <bookings_file.csv>" << std::endl;
+			exit(-1);
+			break;
+		default:
+			std::cout << "Usage: " << argv[0] << " -f <flights_file.csv> -b <bookings_file.csv>" << std::endl;
+			exit(-1);
+			break;
+		}
 	}
-	else
-		std::cout << "Data gathering in progress, please wait...\n";
+
+	if (!flightFile || !bookingFile)
+	{
+		std::cout << "Failed to load files from command arguments, exiting program\n";
+		std::cout << "Usage: " << argv[0] << " -f <flights_file.csv> -b <bookings_file.csv>" << std::endl;
+		exit(-1);
+	}
 
 	std::vector<flight*> flights;
 	std::vector<booking*> bookings;
 	std::vector<int> canceledFlights;
 
-	populateFlightsList(argv[1], &flights);
-	populateBookingList(argv[2], &bookings);
+	populateFlightsList(flightFile, &flights);
+	populateBookingList(bookingFile, &bookings);
 
 	createTickets<flight*, booking*>(flights, bookings);
 
 	checkFlightPopulation<flight*, booking*>(flights, bookings, canceledFlights);
 
 	createSeatMap<flight*, booking*>(flights, bookings);
+
+	std::cout << "Operations completed!" << std::endl;
 
 	return 0;
 }
