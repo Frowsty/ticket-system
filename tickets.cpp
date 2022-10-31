@@ -103,10 +103,17 @@ template <typename A, typename B>
 void createTickets(std::vector<A>& flightList, std::vector<B>& bookingList)
 {
 	srand(time(NULL));
-	for (auto flight : flightList)
+	for (auto& flight : flightList)
 	{
-		std::vector<int> occupiedSeats;
-		for (auto booking : bookingList)
+		int firstClassSeat = 1;
+		int firstClassRow = 1;
+
+		int businessClassSeat = 1;
+		int businessClassRow = flight->fClassSeats / 7 + 1;
+
+		int economyClassSeat = 1;
+		int economyClassRow = (flight->fClassSeats + flight->bClassSeats) / 7 + 1;
+		for (auto& booking : bookingList)
 		{
 			// compare as many parameters as we can to make sure we find the correct flight for the booking
 			// we do this since there's no comparable ID for the booking and flight
@@ -115,29 +122,41 @@ void createTickets(std::vector<A>& flightList, std::vector<B>& bookingList)
 			{
 				if (booking->seatType == "first")
 				{
-					do
+					booking->seat = firstClassSeat;
+					booking->row = firstClassRow;
+					firstClassSeat++;
+
+					if (firstClassSeat > 7)
 					{
-						booking->seat = rand() % flight->fClassSeats + 1; // we want to start at seat number 1 hence + 1 here
-					} while (std::count(occupiedSeats.begin(), occupiedSeats.end(), booking->seat));
+						firstClassSeat = 1;
+						firstClassRow++;
+					}
 				}
 				else if (booking->seatType == "business")
 				{
-					do
+					booking->seat = businessClassSeat;
+					booking->row = businessClassRow;
+					businessClassSeat++;
+
+					if (businessClassSeat > 7)
 					{
-						booking->seat = rand() % flight->bClassSeats + flight->fClassSeats + 1; // we want to start at the last number of first class seats + 1
-					} while (std::count(occupiedSeats.begin(), occupiedSeats.end(), booking->seat));
+						businessClassSeat = 1;
+						businessClassRow++;
+					}
 				}
 				else if (booking->seatType == "economy")
 				{
-					do
-					{
-						booking->seat = rand() % flight->eClassSeats + flight->bClassSeats + flight->fClassSeats + 1; // we want to start at the last number of business class seats
-					} while (std::count(occupiedSeats.begin(), occupiedSeats.end(), booking->seat));
-				}
+					booking->seat = economyClassSeat;
+					booking->row = economyClassRow;
+					economyClassSeat++;
 
-				occupiedSeats.push_back(booking->seat);
+					if (economyClassSeat > 7)
+					{
+						economyClassSeat = 1;
+						economyClassRow++;
+					}
+				}
 				flight->occupiedSeats++;
-				booking->row = booking->seat / 6 + 1; // 6 seats per row and we start at row 1
 
 				char nameBuffer[100];
 				snprintf(nameBuffer, 100, "ticket-%d.txt", booking->id);
@@ -198,6 +217,61 @@ void checkFlightPopulation(std::vector<A>& flightList, std::vector<B>& bookingLi
 	clearCanceledFlights(flightList, canceledList);
 }
 
+template <typename A, typename B>
+void createSeatMap(std::vector<A>& flightList, std::vector<B>& bookingList)
+{
+	// remove the old seatmap file
+	remove("flights-seatmap.txt");
+	for (auto& flight : flightList)
+	{
+		int seats = flight->fClassSeats + flight->bClassSeats + flight->eClassSeats;
+		int rows = seats / 7; // In the planes at my airport we have 7 seats per row
+		std::stringstream seatMap;
+
+		int fClassRow = flight->fClassSeats / 7;
+		int bClassRow = fClassRow + 1;
+		int eClassRow = (flight->fClassSeats + flight->bClassSeats) / 7 + 1;
+		bool seatMapped = false;
+		seatMap << "\nFlight: " << flight->id << " Departure: " << flight->departure << " Destination: " << flight->destination << " Date: " << flight->date << " Time: " << flight->time << "\n";
+
+		seatMap << "First Class\n";
+		for (int i = 1; i <= rows; i++)
+		{
+			if (i == bClassRow)
+				seatMap << "Business Class\n";
+			else if (i == eClassRow)
+				seatMap << "Economy Class\n";
+
+			for (int j = 1; j <= 7; j++)
+			{
+				if (j == 3 || j == 6)
+					seatMap << " ";
+				for (auto& booking : bookingList)
+				{
+					// check if the booking is on the same flight that is currently being seatMapped
+					if ((flight->time == booking->time) && (flight->departure == booking->departure) &&
+						(flight->destination == booking->destination) && (flight->date == booking->date))
+					{
+						if (booking->row == i && booking->seat == j)
+						{
+							seatMapped = true;
+							seatMap << "[1]";
+						}
+					}
+				}
+				if (seatMapped)
+					seatMapped = false;
+				else
+					seatMap << "[0]";
+			}
+			seatMap << "\n";
+		}
+		std::ofstream canceledFlights("flights-seatmap.txt", std::ios_base::app);
+		canceledFlights << seatMap.str();
+		canceledFlights.close();
+	}
+}
+
 int main(int argc, char** argv)
 {
 	if (argc < 2)
@@ -218,6 +292,8 @@ int main(int argc, char** argv)
 	createTickets<flight*, booking*>(flights, bookings);
 
 	checkFlightPopulation<flight*, booking*>(flights, bookings, canceledFlights);
+
+	createSeatMap<flight*, booking*>(flights, bookings);
 
 	return 0;
 }
