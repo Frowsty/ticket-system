@@ -1,3 +1,16 @@
+/*
+ * @file tickets.cpp
+ * @author Daniel Barbis (daniel.barbis@frostys.tech)
+ * @brief Takes flight and ticket information to then create tickets matching the correct flight
+ * and creates both a seatmap for the personell and a canceled-flights list
+ * 
+ * @version 1.0
+ * @date 2022-10-28
+ *
+ * @copyright Copyright (c) 2022
+ */ 
+
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -5,6 +18,10 @@
 #include <sstream>
 #include <ranges>
 #include <GetOpt.h>
+
+/*
+ * @brief flight is a struct containing information about a one specific flight
+ */
 struct flight
 {
 	int id;
@@ -18,6 +35,9 @@ struct flight
 	int occupiedSeats = 0;
 };
 
+/*
+ * @brief booking is a struct containing information about a specific booking
+ */
 struct booking
 {
 	int id;
@@ -32,6 +52,12 @@ struct booking
 	int seat;
 };
 
+/*
+ * @brief This function will populate a vector with flight objects
+ *
+ * @param file The file name of which we will read data from
+ * @param list The vector that should be populated with flight objects
+ */
 void populateFlightsList(std::string file, std::vector<flight*>* list)
 {
 	std::ifstream flightData(file);
@@ -68,6 +94,12 @@ void populateFlightsList(std::string file, std::vector<flight*>* list)
 	}
 }
 
+/*
+ * @brief This function will populate a vector of bookings
+ *
+ * @param file The file name of which we will read data from
+ * @param list The vector that should be populated with booking objects
+ */
 void populateBookingList(std::string file, std::vector<booking*>* list)
 {
 	std::ifstream bookingData(file);
@@ -99,6 +131,12 @@ void populateBookingList(std::string file, std::vector<booking*>* list)
 	}
 }
 
+/*
+ * @brief This function will create tickets for all the bookings
+ *
+ * @param flightList Reference to a vector containing flight* objects
+ * @param bookingList Reference to a vector containing bookings* objects
+ */
 template <typename A, typename B>
 void createTickets(std::vector<A>& flightList, std::vector<B>& bookingList)
 {
@@ -158,18 +196,15 @@ void createTickets(std::vector<A>& flightList, std::vector<B>& bookingList)
 				}
 				flight->occupiedSeats++;
 
-				char nameBuffer[100];
-				snprintf(nameBuffer, 100, "ticket-%d.txt", booking->id);
-				std::ofstream ticketFile(nameBuffer);
+                std::ostringstream ss;
+                ss << "ticket-" << booking->id << ".txt";
+				std::ofstream ticketFile(ss.str());
 
-				// c-style formatting is the king of formatting, sadly C++ doesn't really have their own way
-				// but luckily we still have access to C within C++ so we make use of some nice C features :)
-				char buffer[1000];
-				snprintf(buffer, 1000, "BOOKING: %d\nFLIGHT: %d DEPARTURE: %s DESTINATION: %s %s %s\nPASSENGER: %s %s\nCLASS: %s\nROW: %d SEAT: %d",
-					booking->id, flight->id, flight->departure, flight->destination, flight->date, flight->time, booking->firstName, booking->lastName,
-					booking->seatType, booking->row, booking->seat);
+                ss.str(""); // empty the string contained in ss (ostringstream)
+                ss.clear(); // make sure we clear any possible error flags
 
-				ticketFile << buffer;
+                ss << "BOOKING: " << booking->id << "\nFLIGHT: " << flight->id << " DEPARTURE: " << flight->departure << " DESTINATION: " << flight->destination << "\nPASSENGER: " << booking->firstName << " " << booking->lastName << " CLASS: " << booking->seatType << " ROW: " << booking->row << " SEAT: " << booking->seat;
+				ticketFile << ss.str();
 
 				ticketFile.close();
 			}
@@ -177,15 +212,31 @@ void createTickets(std::vector<A>& flightList, std::vector<B>& bookingList)
 	}
 }
 
+/*
+ * @brief This function will clear the flightList vector of cancelled flights
+ * a flight is canceled by being empty
+ *
+ * @param flightList Reference to a vector containing flight* objects
+ * @param canceledList Reference to a vector containing int (flight indexes)
+ */
 template <typename A>
 void clearCanceledFlights(std::vector<A>& flightList, std::vector<int>& canceledList)
 {
 	for (auto i : std::ranges::views::reverse(canceledList))
-	{
-		flightList.erase(flightList.begin() + i);
+    {
+//      std::cout << "Flight Nr: " << flightList[i]->id << " at time: " << flightList[i]->time<< " is canceled\n";
+        flightList.erase(flightList.begin() + i);
 	}
 }
 
+/*
+ * @brief This function will check if a flight is populated and then
+ * cancel the flight if we have determined that there is no seats booked
+ *
+ * @param flightList Reference to a vector containing flight* objects
+ * @param bookingList Reference to a vector containing bookings* objects
+ * @param canceledList Reference to a vector containing int (flight indexes)
+ */
 template <typename A, typename B>
 void checkFlightPopulation(std::vector<A>& flightList, std::vector<B>& bookingList, std::vector<int>& canceledList)
 {
@@ -201,10 +252,10 @@ void checkFlightPopulation(std::vector<A>& flightList, std::vector<B>& bookingLi
 
 		std::ofstream canceledFlights("canceled-flights.txt", std::ios_base::app);
 
-		char buffer[200];
-		snprintf(buffer, 200, "%d,%s,%s,%s,%s\n", flight->id, flight->departure, flight->destination, flight->date, flight->time);
+        std::ostringstream ss;
+        ss << flight->id << ',' << flight->departure << ',' << flight->destination << ',' << flight->date << ',' << flight->time << "\n";
 
-		canceledFlights << buffer;
+		canceledFlights << ss.str();
 
 		canceledFlights.close();
 
@@ -269,6 +320,14 @@ void createSeatMap(std::vector<A>& flightList, std::vector<B>& bookingList)
 	}
 }
 
+/*
+ * Main entry point
+ * 
+ * @param[in] argc Number of command line arguments
+ * @param[in] argv Array of command line arguments
+ *
+ * @param[out] returns 0 on successful execution
+ */
 int main(int argc, char** argv)
 {
 	char* flightFile = NULL;
@@ -315,6 +374,10 @@ int main(int argc, char** argv)
 	checkFlightPopulation<flight*, booking*>(flights, bookings, canceledFlights);
 
 	createSeatMap<flight*, booking*>(flights, bookings);
+
+    //clear memory
+    delete flightFile;
+    delete bookingFile;
 
 	std::cout << "Operations completed!" << std::endl;
 
