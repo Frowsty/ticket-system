@@ -19,6 +19,8 @@
 #include <ranges>
 #ifdef _WIN32
 #include <GetOpt.h>
+#else
+#include <unistd.h>
 #endif
 
 /*
