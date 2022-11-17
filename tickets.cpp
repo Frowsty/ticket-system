@@ -17,7 +17,9 @@
 #include <fstream>
 #include <sstream>
 #include <ranges>
+#ifdef _WIN32
 #include <GetOpt.h>
+#endif
 
 /*
  * @brief flight is a struct containing information about a one specific flight
