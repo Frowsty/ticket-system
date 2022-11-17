@@ -379,10 +379,6 @@ int main(int argc, char** argv)
 
 	createSeatMap<flight*, booking*>(flights, bookings);
 
-    //clear memory
-    delete flightFile;
-    delete bookingFile;
-
 	std::cout << "Operations completed!" << std::endl;
 
 	return 0;
