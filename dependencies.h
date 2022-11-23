@@ -1,3 +1,14 @@
+/*
+ * @file dependencies.h
+ * @author Daniel Barbis (daniel.barbis@frostys.tech)
+ * @brief Contains all the necessary functions and classes to run our flight ticket system
+ *
+ * @version 1.0
+ * @date 2022-10-28
+ *
+ * @copyright Copyright (c) 2022
+ */
+
 #pragma once
 
 #include <iostream>
