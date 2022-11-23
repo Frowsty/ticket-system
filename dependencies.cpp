@@ -1,3 +1,14 @@
+/*
+ * @file dependencies.cpp
+ * @author Daniel Barbis (daniel.barbis@frostys.tech)
+ * @brief Contains all the function implementations of functions created in dependencies.h
+ *
+ * @version 1.0
+ * @date 2022-10-28
+ *
+ * @copyright Copyright (c) 2022
+ */
+
 #include "dependencies.h"
 
 /*
