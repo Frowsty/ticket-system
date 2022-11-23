@@ -60,6 +60,12 @@ void populateFlightsList(std::string file, std::vector<Flight*>* list)
 	}
 }
 
+/*
+ * @brief This function will create a seat map of the flights
+ *
+ * @param flightList A vector containing all the flights
+ * @param bookingList A vector containing all the bookings
+ */
 void createSeatMap(std::vector<Flight*>& flightList, std::vector<Booking*>& bookingList)
 {
 	// remove the old seatmap file
