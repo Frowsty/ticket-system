@@ -20,3 +20,5 @@ Produce Docs|     YES       |      YES
 Templates?  |     YES       |      NO
 Try-Catch   |     NO        |      NO
 Student Unique?|  YES       |      YES
+Classes?    |     YES       |      YES
+Setter/Getter functions? | NO | YES
