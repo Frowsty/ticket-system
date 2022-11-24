@@ -274,6 +274,12 @@ void checkFlightPopulation(std::vector<A>& flightList, std::vector<B>& bookingLi
 	clearCanceledFlights(flightList, canceledList);
 }
 
+/*
+ * @brief This function will create a seat map of the flights
+ *
+ * @param flightList A vector containing all the flights
+ * @param bookingList A vector containing all the bookings
+ */
 template <typename A, typename B>
 void createSeatMap(std::vector<A>& flightList, std::vector<B>& bookingList)
 {
