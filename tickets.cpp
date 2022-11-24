@@ -24,15 +24,24 @@
 #endif
 
 /*
- * @brief flight is a struct containing information about a one specific flight
+ * @brief Base is a class that contains information that is used in both Flight and Booking thus is used as a base  * class to inherit from
  */
-struct flight
+class Base
 {
-	int id;
-	std::string departure;
-	std::string destination;
-	std::string date;
-	std::string time;
+public:
+    int id;
+    std::string departure;
+    std::string destination;
+    std::string date;
+    std::string time;
+};
+
+/*
+ * @brief flight is a class containing information about a specific flight
+ */
+class Flight : public Base
+{
+public:
 	int fClassSeats;
 	int bClassSeats;
 	int eClassSeats;
@@ -40,15 +49,11 @@ struct flight
 };
 
 /*
- * @brief booking is a struct containing information about a specific booking
+ * @brief booking is a class containing information about a specific booking
  */
-struct booking
+class Booking : public Base
 {
-	int id;
-	std::string date;
-	std::string time;
-	std::string departure;
-	std::string destination;
+public:
 	std::string seatType;
 	std::string firstName;
 	std::string lastName;
@@ -62,7 +67,7 @@ struct booking
  * @param file The file name of which we will read data from
  * @param list The vector that should be populated with flight objects
  */
-void populateFlightsList(std::string file, std::vector<flight*>* list)
+void populateFlightsList(std::string file, std::vector<Flight*>* list)
 {
 	std::ifstream flightData(file);
 	std::string fileData;
@@ -70,7 +75,7 @@ void populateFlightsList(std::string file, std::vector<flight*>* list)
 	{
 		while (getline(flightData, fileData) && !fileData.empty())
 		{
-			flight* temp = new flight;
+			Flight* temp = new Flight;
 			std::stringstream data(fileData);
 			std::string tempString;
 			getline(data, tempString, ',');
@@ -104,7 +109,7 @@ void populateFlightsList(std::string file, std::vector<flight*>* list)
  * @param file The file name of which we will read data from
  * @param list The vector that should be populated with booking objects
  */
-void populateBookingList(std::string file, std::vector<booking*>* list)
+void populateBookingList(std::string file, std::vector<Booking*>* list)
 {
 	std::ifstream bookingData(file);
 	std::string fileData;
@@ -112,7 +117,7 @@ void populateBookingList(std::string file, std::vector<booking*>* list)
 	{
 		while (getline(bookingData, fileData) && !fileData.empty())
 		{
-			booking* temp = new booking;
+			Booking* temp = new Booking;
 			std::stringstream data(fileData);
 			std::string tempString;
 			getline(data, tempString, ',');
@@ -138,8 +143,8 @@ void populateBookingList(std::string file, std::vector<booking*>* list)
 /*
  * @brief This function will create tickets for all the bookings
  *
- * @param flightList Reference to a vector containing flight* objects
- * @param bookingList Reference to a vector containing bookings* objects
+ * @param flightList Reference to a vector containing Flight* objects
+ * @param bookingList Reference to a vector containing Bookings* objects
  */
 template <typename A, typename B>
 void createTickets(std::vector<A>& flightList, std::vector<B>& bookingList)
@@ -366,18 +371,18 @@ int main(int argc, char** argv)
 		exit(-1);
 	}
 
-	std::vector<flight*> flights;
-	std::vector<booking*> bookings;
+	std::vector<Flight*> flights;
+	std::vector<Booking*> bookings;
 	std::vector<int> canceledFlights;
 
 	populateFlightsList(flightFile, &flights);
 	populateBookingList(bookingFile, &bookings);
 
-	createTickets<flight*, booking*>(flights, bookings);
+	createTickets<Flight*, Booking*>(flights, bookings);
 
-	checkFlightPopulation<flight*, booking*>(flights, bookings, canceledFlights);
+	checkFlightPopulation<Flight*, Booking*>(flights, bookings, canceledFlights);
 
-	createSeatMap<flight*, booking*>(flights, bookings);
+	createSeatMap<Flight*, Booking*>(flights, bookings);
 
 	std::cout << "Operations completed!" << std::endl;
 
