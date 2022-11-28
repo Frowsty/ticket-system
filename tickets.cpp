@@ -1,4 +1,4 @@
-/*
+/**
  * @file tickets.cpp
  * @author Daniel Barbis (daniel.barbis@frostys.tech)
  * @brief Takes flight and ticket information to then create tickets matching the correct flight
@@ -23,7 +23,7 @@
 #include <unistd.h>
 #endif
 
-/*
+/**
  * @brief Base is a class that contains information that is used in both Flight and Booking thus is used as a base  * class to inherit from
  */
 class Base
@@ -36,7 +36,7 @@ public:
     std::string time;
 };
 
-/*
+/**
  * @brief flight is a class containing information about a specific flight
  */
 class Flight : public Base
@@ -48,7 +48,7 @@ public:
 	int occupiedSeats = 0;
 };
 
-/*
+/**
  * @brief booking is a class containing information about a specific booking
  */
 class Booking : public Base
@@ -61,7 +61,7 @@ public:
 	int seat;
 };
 
-/*
+/**
  * @brief This function will populate a vector with flight objects
  *
  * @param file The file name of which we will read data from
@@ -103,7 +103,7 @@ void populateFlightsList(std::string file, std::vector<Flight*>* list)
 	}
 }
 
-/*
+/**
  * @brief This function will populate a vector of bookings
  *
  * @param file The file name of which we will read data from
@@ -140,7 +140,7 @@ void populateBookingList(std::string file, std::vector<Booking*>* list)
 	}
 }
 
-/*
+/**
  * @brief This function will create tickets for all the bookings
  *
  * @param flightList Reference to a vector containing Flight* objects
@@ -221,7 +221,7 @@ void createTickets(std::vector<A>& flightList, std::vector<B>& bookingList)
 	}
 }
 
-/*
+/**
  * @brief This function will clear the flightList vector of cancelled flights
  * a flight is canceled by being empty
  *
@@ -238,7 +238,7 @@ void clearCanceledFlights(std::vector<A>& flightList, std::vector<int>& canceled
 	}
 }
 
-/*
+/**
  * @brief This function will check if a flight is populated and then
  * cancel the flight if we have determined that there is no seats booked
  *
@@ -274,7 +274,7 @@ void checkFlightPopulation(std::vector<A>& flightList, std::vector<B>& bookingLi
 	clearCanceledFlights(flightList, canceledList);
 }
 
-/*
+/**
  * @brief This function will create a seat map of the flights
  *
  * @param flightList A vector containing all the flights
@@ -335,7 +335,7 @@ void createSeatMap(std::vector<A>& flightList, std::vector<B>& bookingList)
 	}
 }
 
-/*
+/**
  * Main entry point
  * 
  * @param[in] argc Number of command line arguments
