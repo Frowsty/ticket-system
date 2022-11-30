@@ -18,6 +18,23 @@ g++ tickets.cpp -o tickets -std=c++20
 // if you're unsure of which version of g++ you have installed run this command
 g++-10 tickets.cpp -o tickets -std=c++20
 ```
+#### How to run the program
+```cpp
+// to run the program manually run the following line in powershell or terminal
+./tickets -f flights.csv -b bookings.csv
+// to run the program manually from windows cmd
+tickets -f flights.csv -b bookings.csv
+// to run the program with make
+make run
+```
+
+#### Generate documentation
+```cpp
+// Manually generate docs
+doxygen tickets.cpp
+// Generate docs with make
+make gen-docs
+```
 
 ## Information
 This is the first version of my ticket-system, the second version uses a multifile layout but is lacking some C++ features that are present in this first version. The main differences are the following
